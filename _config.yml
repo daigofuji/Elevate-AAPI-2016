@@ -1,0 +1,13 @@
+name : State-by-state look at Asian Americans
+brand : Asian Americans by State
+description : Elevate AAPI Data Challenge submission by Daigo Fujiwara
+keyword : 
+url : http://daigofuji.github.io/Elevate-AAPI-2016/
+email : daigo@daigofujiwara.com
+twitter : DaigoFuji
+github : DaigoFuji
+author : Daigo Fujiwara
+year : 2016
+markdown : kramdown
+exclude :
+  - node_modules

@@ -1,0 +1,184 @@
+---
+layout: default
+title: State-by-State look at Asian Americans
+description: Elevate AAPI Data Challenge submission by Daigo Fujiwara
+keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
+---
+
+<section role="main">
+  <div class="small-12 columns">
+    <h1 class="mtl">{{ page.title }}</h1>
+    <h5 class="mbl">By Daigo Fujiwara</h5>
+    <div class="row">
+      <div class="medium-9 large-7 small-centered column">
+        
+        <p class="mbm">According to U.S. Censes 2010-2014 American Community Survey 5-Year Estimates, 15,710,659 of total 314,107,084 U.S. population are Asian Americans. Following data visualization will let you explore what groups are more likely to live in which State? <small class="quiet">2016 Elevate AAPI Data Challenge submission by Daigo Fujiwara.</small></p>
+        
+        <select>
+          <option value="asian" selected>All Asian</option>
+          <option value="chinese">Chinese, except Taiwanese</option>
+          <option value="indian">Asian Indian</option>
+          <option value="filipino">Filipino</option>
+          <option value="vietnamese">Vietnamese</option>
+          <option value="korean">Korean</option>
+          <option value="japanese">Japanese</option>
+          <option value="pakistani">Pakistani</option>
+          <option value="cambodian">Cambodian</option>
+          <option value="hmong">Hmong</option>
+          <option value="laotian">Laotian</option>
+          <option value="thai">Thai</option>
+          <option value="taiwanese">Taiwanese</option>
+          <option value="bangladeshi">Bangladeshi</option>
+          <option value="indonesian">Indonesian</option>
+          <option value="sri-lankan">Sri Lankan</option>
+          <option value="malaysian">Malaysian</option>
+          <option value="other-asian">Other Asian</option>
+          <option value="other-not-specified">Other Asian, not specified</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row"> 
+
+      <div class="large-12 columns">
+        <div id="graphic-container">
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="http://d3js.org/topojson.v1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+        <script src="js/colorbrewer.js"></script>
+        <script>/* queue */(function(){function n(n){function t(){for(;f=a<c.length&&n>p;){var u=a++,t=c[u],r=l.call(t,1);r.push(e(u)),++p,t[0].apply(null,r)}}function e(n){return function(u,l){--p,null==d&&(null!=u?(d=u,a=s=0/0,r()):(c[n]=l,--s?f||t():r()))}}function r(){null!=d?v(d):i?v(d,c):v.apply(null,[d].concat(c))}var o,f,i,c=[],a=0,p=0,s=0,d=null,v=u;return n||(n=1/0),o={defer:function(){return d||(c.push(arguments),++s,t()),o},await:function(n){return v=n,i=!1,s||r(),o},awaitAll:function(n){return v=n,i=!0,s||r(),o}}}function u(){}"undefined"==typeof module?self.queue=n:module.exports=n,n.version="1.0.4";var l=[].slice})();</script>
+
+          <div id="map"></div> 
+ 
+<script type="text/javascript">
+var urls = {
+    us: "data/us.json",
+    data: "data/asian2014.csv"
+};
+
+var margin = {top: 10, left: 0, bottom: 10, right: 0},
+  width = parseInt(d3.select('#map').style('width')),
+  width = width - margin.left - margin.right,
+  mapRatio = .6,
+  height = width * mapRatio;
+
+var formats = {
+    percent: d3.format('%')
+};
+
+// projection and path setup
+var projection = d3.geo.albersUsa()
+    .scale(width)
+    .translate([width / 2, height / 2]);
+
+var path = d3.geo.path()
+    .projection(projection);
+
+// scales and axes
+// http://tristen.ca/hcl-picker/#/hlc/10/1/242E3D/F4FB70
+var colors = d3.scale.quantize()
+    .range(['#F4FB70','#BEE973','#8ED479','#65BD7E','#43A580','#2B8D7D','#227474','#245B65','#264452','#242E3D']);
+
+// make a map
+var map = d3.select('#map').append('svg')
+    .style('height', height + 'px')
+    .style('width', width + 'px');
+
+// queue and render
+queue()
+    .defer(d3.json, urls.us)
+    .defer(d3.csv, urls.data)
+    .await(render);
+
+// catch the resize
+d3.select(window).on('resize', resize);
+
+// template, for later
+//var template = _.template(d3.select('#tooltip-template').html());
+
+function render(err, us, data) {
+
+    var land = topojson.mesh(us, us.objects.land),
+      states = topojson.feature(us, us.objects.states);
+
+    window.us = us;
+
+    data = window.data = _(data).chain().map(function(d) {
+        d.total = +d['total-pop'];
+        d.asian = +d['asian-pop'];
+        d.percent = d['asian-pop'] / d['total-pop'];
+        d.per10k = d['asian-per-10k']
+        return [d.state, d];
+    }).object().value();
+
+    colors.domain([
+        0, 
+        d3.max(d3.values(data), function(d) { return d.per10k; })
+    ]);
+
+    map.append('path')
+        .datum(land)
+        .attr('class', 'land')
+        .attr('d', path);
+
+    var states = map.selectAll('path.state')
+        .data(states.features)
+      .enter().append('path')
+        .attr('class', 'state')
+        .attr('id', function(d) { 
+            return d.properties.name.toLowerCase().replace(/\s/g, '-'); 
+        })
+        .attr('d', path)
+        .style('fill', function(d) {
+            var name = d.properties.name
+              , value = data[name] ? data[name].percent : null;
+
+            return colors(value);
+        });
+
+    //states.on('mouseover', tooltipShow)
+      //  .on('mouseout', tooltipHide);
+
+}
+
+function resize() {
+    // adjust things when the window size changes
+    width = parseInt(d3.select('#map').style('width'));
+    width = width - margin.left - margin.right;
+    height = width * mapRatio;
+
+    // update projection
+    projection
+        .translate([width / 2, height / 2])
+        .scale(width);
+
+    // resize the map container
+    map
+        .style('width', width + 'px')
+        .style('height', height + 'px');
+
+    // resize the map
+    map.select('.land').attr('d', path);
+    map.selectAll('.state').attr('d', path);
+}
+
+</script>
+
+<script type="x-jst" id="tooltip-template">
+<h5><%= Name %></h5>
+<p><%= formats.percent(percent) %> have a BA degree or higher.</p>
+</script>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="medium-9 large-7 small-centered column">
+      
+        
+
+      </div>
+    </div>
+
+  </div>
+</section>
