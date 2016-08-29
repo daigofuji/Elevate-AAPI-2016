@@ -12,9 +12,12 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
     <div class="row">
       <div class="medium-9 large-7 small-centered column">
         
-        <p class="mbm">According to U.S. Censes 2010-2014 American Community Survey 5-Year Estimates, 15,710,659 of total 314,107,084 U.S. population are Asian Americans. Following data visualization will let you explore what groups are more likely to live in which State? <small class="quiet">2016 Elevate AAPI Data Challenge submission by Daigo Fujiwara.</small></p>
+        <p class="mbn">According to U.S. Censes <a href="http://www.census.gov/data/developers/data-sets/acs-survey-5-year-data.html" title="2010-2014 American Community Survey 5-Year Estimates">2014 Estimates</a>,</p>
+        <h4 class="mvn"><strong class="loud" id="group-number">15,710,659</strong> of total <strong>314,107,084</strong> U.S. population are <strong id="group-name" class="loud">Asian Americans</strong>, which accounts for <strong class="loud"><span id="group-percent"></span></strong>.</h4>
+        <p class="mtn">Explore the map by tapping, or use the pulldown to see how each groups are distributed.</p>
         
-        <select>
+        <label>Select other groups:</label>
+        <select id="js-pulldown">
           <option value="asian" selected>All Asian</option>
           <option value="chinese">Chinese, except Taiwanese</option>
           <option value="indian">Asian Indian</option>
@@ -41,143 +44,280 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
     <div class="row"> 
 
       <div class="large-12 columns">
-        <div id="graphic-container">
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script src="http://d3js.org/topojson.v1.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-        <script src="js/colorbrewer.js"></script>
         <script>/* queue */(function(){function n(n){function t(){for(;f=a<c.length&&n>p;){var u=a++,t=c[u],r=l.call(t,1);r.push(e(u)),++p,t[0].apply(null,r)}}function e(n){return function(u,l){--p,null==d&&(null!=u?(d=u,a=s=0/0,r()):(c[n]=l,--s?f||t():r()))}}function r(){null!=d?v(d):i?v(d,c):v.apply(null,[d].concat(c))}var o,f,i,c=[],a=0,p=0,s=0,d=null,v=u;return n||(n=1/0),o={defer:function(){return d||(c.push(arguments),++s,t()),o},await:function(n){return v=n,i=!1,s||r(),o},awaitAll:function(n){return v=n,i=!0,s||r(),o}}}function u(){}"undefined"==typeof module?self.queue=n:module.exports=n,n.version="1.0.4";var l=[].slice})();</script>
 
           <div id="map"></div> 
  
-<script type="text/javascript">
-var urls = {
-    us: "data/us.json",
-    data: "data/asian2014.csv"
-};
+          <script type="text/javascript">
 
-var margin = {top: 10, left: 0, bottom: 10, right: 0},
-  width = parseInt(d3.select('#map').style('width')),
-  width = width - margin.left - margin.right,
-  mapRatio = .6,
-  height = width * mapRatio;
+          var group = {};
+          // get group from url
+          if(window.location.hash) {
+            var ghash = window.location.hash.replace('#', '')
+            // huge switch statement for 18 groups
+            switch(ghash) {
+              case 'chinese':
+                group.name ='Chinese Americans (except Taiwanese)';
+                group.num = '3551337';
+                group.id = ghash;
+                break;
+              case 'indian':
+                group.name ='Asian Indian Americans';
+                group.num = '3111333';
+                group.id = ghash;
+                break;
+              case 'filipino':
+                group.name ='Filipino Americans';
+                group.num = '2653959';
+                group.id = ghash;
+                break;
+              case 'vietnamese':
+                group.name ='Vietnamese Americans';
+                group.num = '1681643';
+                group.id = ghash;
+                break;
+              case 'korean':
+                group.name ='Korean Americans';
+                group.num = '1453807';
+                group.id = ghash;
+                break;
+              case 'japanese':
+                group.name ='Japanese Americans';
+                group.num = '779141';
+                group.id = ghash;
+                break;
+              case 'pakistani':
+                group.name ='Pakistani Americans';
+                group.num = '587650';
+                group.id = ghash;
+                break;
+              case 'cambodian':
+                group.name ='Cambodian Americans';
+                group.num = '396318';
+                group.id = ghash;
+                break;
+              case 'hmong':
+                group.name ='Hmong Americans';
+                group.num = '262165';
+                group.id = ghash;
+                break;
+              case 'laotian':
+                group.name ='Laotian Americans';
+                group.num = '258621';
+                group.id = ghash;
+                break;
+              case 'thai':
+                group.name ='Thai Americans';
+                group.num = '208254';
+                group.id = ghash;
+                break;
+              case 'taiwanese':
+                group.name ='Taiwanese Americans';
+                group.num = '185536';
+                group.id = ghash;
+                break;
+              case 'bangladeshi':
+                group.name ='Bangladeshi Americans';
+                group.num = '159044';
+                group.id = ghash;
+                break;
+              case 'indonesian':
+                group.name ='Indonesian Americans';
+                group.num = '144160';
+                group.id = ghash;
+                break;
+              case 'sri-lankan':
+                group.name ='Sri Lankan Americans';
+                group.num = '142105';
+                group.id = ghash;
+                break;
+              case 'malaysian':
+                group.name ='Malaysian Americans';
+                group.num = '72172';
+                group.id = ghash;
+                break;
+              case 'other-asian':
+                group.name ='Other Asian Americans';
+                group.num = '44093';
+                group.id = ghash;
+                break;
+              case 'other-not-specified':
+                group.id = ghash;
+                group.name ='Other Asian Americans (not specified)';
+                group.num = '19321';
+                break;
+              // all else get default
+              default:
+                group.name ='Asian Americans';
+                group.num = '15710659';
+                group.id = 'asian';
+                break;
+            }
+            
+          } else {
+            group.name ='Asian Americans';
+            group.num = '15710659';
+            group.id = 'asian';
+          }
+          //set the pulldown
+          $('#js-pulldown').val(group.id);
 
-var formats = {
-    percent: d3.format('%')
-};
+          var urls = {
+              us: "data/us.json",
+              data: "data/asian2014.csv"
+          };
 
-// projection and path setup
-var projection = d3.geo.albersUsa()
-    .scale(width)
-    .translate([width / 2, height / 2]);
+          var margin = {top: 10, left: 0, bottom: 10, right: 0},
+            width = parseInt(d3.select('#map').style('width')),
+            width = width - margin.left - margin.right,
+            mapRatio = .6,
+            height = width * mapRatio;
 
-var path = d3.geo.path()
-    .projection(projection);
+          // projection and path setup
+          var projection = d3.geo.albersUsa()
+              .scale(width)
+              .translate([width / 2, height / 2]);
 
-// scales and axes
-// http://tristen.ca/hcl-picker/#/hlc/10/1/242E3D/F4FB70
-var colors = d3.scale.quantize()
-    .range(['#F4FB70','#BEE973','#8ED479','#65BD7E','#43A580','#2B8D7D','#227474','#245B65','#264452','#242E3D']);
+          var path = d3.geo.path()
+              .projection(projection);
 
-// make a map
-var map = d3.select('#map').append('svg')
-    .style('height', height + 'px')
-    .style('width', width + 'px');
+          // scales and axes
+          // http://tristen.ca/hcl-picker/#/hlc/10/1/242E3D/F4FB70
+          var colors = d3.scale.quantize()
+              .range(['#F4FB70','#BEE973','#8ED479','#65BD7E','#43A580','#2B8D7D','#227474','#245B65','#264452','#242E3D']);
 
-// queue and render
-queue()
-    .defer(d3.json, urls.us)
-    .defer(d3.csv, urls.data)
-    .await(render);
+          // make a map
+          var map = d3.select('#map').append('svg')
+              .style('height', height + 'px')
+              .style('width', width + 'px');
 
-// catch the resize
-d3.select(window).on('resize', resize);
+          // catch the resize
+          d3.select(window).on('resize', resize);
 
-// template, for later
-//var template = _.template(d3.select('#tooltip-template').html());
+          // template, for later
+          //var template = _.template(d3.select('#tooltip-template').html());
+                   
+          function render(err, us, data) {
 
-function render(err, us, data) {
+            var land = topojson.mesh(us, us.objects.land),
+            states = topojson.feature(us, us.objects.states);
+ 
+              window.us = us;
+              data = window.data = _(data).chain().map(function(d) {
+                  return [d.state, d];
+              }).object().value();
 
-    var land = topojson.mesh(us, us.objects.land),
-      states = topojson.feature(us, us.objects.states);
+            // change intro text
+            $('#group-name').text(group.name);
+            $('#group-percent').text(d3.format(",.2%")(group.num/314107084));
+            $('#group-number').text(d3.format(",")(group.num));
+  
+              colors.domain([
+                  0, 
+                  d3.max(d3.values(data), function(d){ return parseFloat(d[group.id+'PerTenk']); })
+                  //cal asianPerTenk
+              ]);
 
-    window.us = us;
+              map.append('path')
+                  .datum(land)
+                  .attr('class', 'land')
+                  .attr('d', path);
 
-    data = window.data = _(data).chain().map(function(d) {
-        d.total = +d['total-pop'];
-        d.asian = +d['asian-pop'];
-        d.percent = d['asian-pop'] / d['total-pop'];
-        d.per10k = d['asian-per-10k']
-        return [d.state, d];
-    }).object().value();
+              states = window.states =
+                map.selectAll('path')
+                .data(states.features)
+                .enter().append('path')
+                  .attr('class', 'state')
+                  .attr('id', function(d) { 
+                      return d.properties.name.toLowerCase().replace(/\s/g, '-'); 
+                  })
+                  .attr('d', path)
+                  .style('fill', function(d) {
+                      var name = d.properties.name,
+                      value = data[name] ? data[name][group.id+'PerTenk'] : null;
 
-    colors.domain([
-        0, 
-        d3.max(d3.values(data), function(d) { return d.per10k; })
-    ]);
+                      return colors(value);
+                  });
 
-    map.append('path')
-        .datum(land)
-        .attr('class', 'land')
-        .attr('d', path);
+              states.on('mouseover', tooltipShow)
+                  .on('mouseout', tooltipHide);
+          }
 
-    var states = map.selectAll('path.state')
-        .data(states.features)
-      .enter().append('path')
-        .attr('class', 'state')
-        .attr('id', function(d) { 
-            return d.properties.name.toLowerCase().replace(/\s/g, '-'); 
-        })
-        .attr('d', path)
-        .style('fill', function(d) {
-            var name = d.properties.name
-              , value = data[name] ? data[name].percent : null;
+          // change pulldown to select different group
+          $('#js-pulldown').change(function() {
 
-            return colors(value);
-        });
+            var url = window.location.href;
+            url = url.substring(0, url.indexOf('#'));
+            url += '#';
+            url += $(this).val(); // get selected value
+            
+            // redirect and reload the page
+            window.location = url; 
+            window.location.reload();
+          });
 
-    //states.on('mouseover', tooltipShow)
-      //  .on('mouseout', tooltipHide);
+          function tooltipShow(ev) {
+            console.log(ev);
+          }
 
-}
+          function tooltipHide(ev) {
+          }
 
-function resize() {
-    // adjust things when the window size changes
-    width = parseInt(d3.select('#map').style('width'));
-    width = width - margin.left - margin.right;
-    height = width * mapRatio;
+          // responsive resuize by eyeseast
+          // http://eyeseast.github.io/visible-data/2013/08/26/responsive-d3/
 
-    // update projection
-    projection
-        .translate([width / 2, height / 2])
-        .scale(width);
+          function resize() {
+              // adjust things when the window size changes
+              width = parseInt(d3.select('#map').style('width'));
+              width = width - margin.left - margin.right;
+              height = width * mapRatio;
 
-    // resize the map container
-    map
-        .style('width', width + 'px')
-        .style('height', height + 'px');
+              // update projection
+              projection
+                  .translate([width / 2, height / 2])
+                  .scale(width);
 
-    // resize the map
-    map.select('.land').attr('d', path);
-    map.selectAll('.state').attr('d', path);
-}
+              // resize the map container
+              map
+                  .style('width', width + 'px')
+                  .style('height', height + 'px');
 
-</script>
+              // resize the map
+              map.select('.land').attr('d', path);
+              map.selectAll('.state').attr('d', path);
+          }
 
-<script type="x-jst" id="tooltip-template">
-<h5><%= Name %></h5>
-<p><%= formats.percent(percent) %> have a BA degree or higher.</p>
-</script>
-        </div>
-      </div>
-    </div>
+
+
+
+           // queue and render
+          queue()
+              .defer(d3.json, urls.us)
+              .defer(d3.csv, urls.data)
+              .await(render);
+
+
+          </script>
+
+      </div><!-- /col -->
+    </div><!-- /row -->
 
     <div class="row">
-      <div class="medium-9 large-7 small-centered column">
+      <div class="medium-4 column" id="infobox">
       
         
 
       </div>
+
+      <div class="medium-8 column" id="table">
+      
+        
+
+      </div>  
     </div>
 
   </div>

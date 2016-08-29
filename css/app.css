@@ -4704,19 +4704,16 @@ h1, h2, h3, h4, h5, h6 {
 .quiet {
   font-size: 80%; }
 
+.loud {
+  font-weight: bold;
+  font-size: 150%; }
+
 .title-bar {
   box-shadow: 0 0 10px rgba(138, 138, 138, 0.3); }
   .title-bar .title-bar-title {
     font-weight: 800; }
 
-#graphic-container {
-  position: relative; }
-
-#graphic-container #statesvg {
-  width: 100%;
-  height: 60%; }
-
-#graphic-container g {
+#map path {
   fill: #EEE;
   stroke: #FFF;
   stroke-width: 1px; }
