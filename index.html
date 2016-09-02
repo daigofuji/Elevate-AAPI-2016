@@ -51,9 +51,21 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
         <script>/* queue */(function(){function n(n){function t(){for(;f=a<c.length&&n>p;){var u=a++,t=c[u],r=l.call(t,1);r.push(e(u)),++p,t[0].apply(null,r)}}function e(n){return function(u,l){--p,null==d&&(null!=u?(d=u,a=s=0/0,r()):(c[n]=l,--s?f||t():r()))}}function r(){null!=d?v(d):i?v(d,c):v.apply(null,[d].concat(c))}var o,f,i,c=[],a=0,p=0,s=0,d=null,v=u;return n||(n=1/0),o={defer:function(){return d||(c.push(arguments),++s,t()),o},await:function(n){return v=n,i=!1,s||r(),o},awaitAll:function(n){return v=n,i=!0,s||r(),o}}}function u(){}"undefined"==typeof module?self.queue=n:module.exports=n,n.version="1.0.4";var l=[].slice})();</script>
 
           <div id="map"></div> 
- 
+          <div id="infobox">
+            <h4 id="state-name" class="font-heavy">Hover over map to see breakdown</h4>
+            <table>
+              <tr><td>Total population of the state</td><td id="total-pop" class="text-right"></td><td></td></tr>
+              <tr><td id="group-table" class="font-bold"></td><td id="group-pop" class="text-right font-bold"></td><td id="group-per" class="text-right font-bold"></td></tr>
+              <tr><td>- White alone </td><td id="white-pop" class="text-right"></td><td id="white-per" class="text-right"></td></tr>
+              <tr><td>- Black or African American alone</td><td id="black-pop" class="text-right"></td><td id="black-per" class="text-right"></td></tr>
+              <tr><td>- American Indian and Alaska Native alone</td><td id="native-pop" class="text-right"></td><td id="native-per" class="text-right"></td></tr>
+              <tr><td>- Asian alone</td><td id="asian-pop" class="text-right"></td><td id="asian-per" class="text-right"></td></tr>
+              <tr><td>- Native Hawaiian and Other Pacific Islander alone</td><td id="hawaii-pop" class="text-right"></td><td id="hawaii-per" class="text-right"></td></tr>
+              <tr><td>- Some other race alone</td><td id="other-race-pop" class="text-right"></td><td id="other-race-per" class="text-right"></td></tr>
+              <tr><td>- Two or more races</td><td id="multi-race-pop" class="text-right"></td><td id="multi-race-per" class="text-right"></td></tr>
+            </table>
+          </div>
           <script type="text/javascript">
-
           var group = {};
           // get group from url
           if(window.location.hash) {
@@ -179,21 +191,21 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
 
           // projection and path setup
           var projection = d3.geo.albersUsa()
-              .scale(width)
-              .translate([width / 2, height / 2]);
+            .scale(width)
+            .translate([width / 2, height / 2]);
 
           var path = d3.geo.path()
-              .projection(projection);
+            .projection(projection);
 
           // scales and axes
           // http://tristen.ca/hcl-picker/#/hlc/10/1/242E3D/F4FB70
           var colors = d3.scale.quantize()
-              .range(['#F4FB70','#BEE973','#8ED479','#65BD7E','#43A580','#2B8D7D','#227474','#245B65','#264452','#242E3D']);
+            .range(['#F4FB70','#BEE973','#8ED479','#65BD7E','#43A580','#2B8D7D','#227474','#245B65','#264452','#242E3D']);
 
           // make a map
           var map = d3.select('#map').append('svg')
-              .style('height', height + 'px')
-              .style('width', width + 'px');
+            .style('height', height + 'px')
+            .style('width', width + 'px');
 
           // catch the resize
           d3.select(window).on('resize', resize);
@@ -208,43 +220,74 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
  
               window.us = us;
               data = window.data = _(data).chain().map(function(d) {
-                  return [d.state, d];
+                return [d.state, d];
               }).object().value();
 
             // change intro text
             $('#group-name').text(group.name);
+            $('#group-table').text(group.name);
+
             $('#group-percent').text(d3.format(",.2%")(group.num/314107084));
             $('#group-number').text(d3.format(",")(group.num));
   
               colors.domain([
-                  0, 
-                  d3.max(d3.values(data), function(d){ return parseFloat(d[group.id+'PerTenk']); })
-                  //cal asianPerTenk
+                0, 
+                d3.max(d3.values(data), function(d){ return parseFloat(d[group.id+'PerTenk']); })
+                //cal asianPerTenk
               ]);
 
               map.append('path')
-                  .datum(land)
-                  .attr('class', 'land')
-                  .attr('d', path);
+                .datum(land)
+                .attr('class', 'land')
+                .attr('d', path);
 
-              states = window.states =
+              states = window.states = 
                 map.selectAll('path')
                 .data(states.features)
                 .enter().append('path')
                   .attr('class', 'state')
                   .attr('id', function(d) { 
-                      return d.properties.name.toLowerCase().replace(/\s/g, '-'); 
+                    return d.properties.name.toLowerCase().replace(/\s/g, '-'); 
                   })
                   .attr('d', path)
                   .style('fill', function(d) {
-                      var name = d.properties.name,
-                      value = data[name] ? data[name][group.id+'PerTenk'] : null;
-
-                      return colors(value);
+                    var name = d.properties.name,
+                    value = data[name] ? data[name][group.id+'PerTenk'] : null;
+                    return colors(value);
+                  })
+                  .attr('data-state', function(d) {
+                    return d.properties.name; 
+                  })
+                  .attr('data-group-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name][group.id+'Pop'] : null; 
+                  })
+                  .attr('data-total-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['totalPop'] : null; 
+                  })
+                  .attr('data-white-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['whitePop'] : null; 
+                  })
+                  .attr('data-black-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['blackPop'] : null; 
+                  })
+                  .attr('data-native-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['nativePop'] : null; 
+                  })
+                  .attr('data-asian-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['asianPop'] : null; 
+                  })
+                  .attr('data-hawaii-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['hawaiiPop'] : null; 
+                  })
+                  .attr('data-other-race-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['other-racePop'] : null; 
+                  })
+                  .attr('data-multi-race-pop', function(d) {
+                    return data[d.properties.name] ? data[d.properties.name]['multi-racePop'] : null; 
                   });
 
               states.on('mouseover', tooltipShow)
-                  .on('mouseout', tooltipHide);
+                .on('mouseout', tooltipHide);
           }
 
           // change pulldown to select different group
@@ -261,7 +304,42 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
           });
 
           function tooltipShow(ev) {
-            console.log(ev);
+            var state = $(this);
+            console.log(ev.properties.name, d3.format(",")(state.attr('data-total-pop')));
+            $('#state-name').text(ev.properties.name);
+            $('#total-pop').text(d3.format(",")(state.attr('data-total-pop')));
+            $('#group-pop').text(d3.format(",")(state.attr('data-group-pop')));
+            $('#group-per').text(d3.format(".2%")(
+              state.attr('data-group-pop')/state.attr('data-total-pop')
+            ));
+            $('#white-pop').text(d3.format(",")(state.attr('data-white-pop')));
+            $('#white-per').text(d3.format(".2%")(
+              state.attr('data-white-pop')/state.attr('data-total-pop')
+            ));
+            $('#black-pop').text(d3.format(",")(state.attr('data-black-pop')));
+            $('#black-per').text(d3.format(".2%")(
+              state.attr('data-black-pop')/state.attr('data-total-pop')
+            ));
+            $('#native-pop').text(d3.format(",")(state.attr('data-native-pop')));
+            $('#native-per').text(d3.format(".2%")(
+              state.attr('data-native-pop')/state.attr('data-total-pop')
+            ));
+            $('#asian-pop').text(d3.format(",")(state.attr('data-asian-pop')));
+            $('#asian-per').text(d3.format(".2%")(
+              state.attr('data-asian-pop')/state.attr('data-total-pop')
+            ));
+            $('#hawaii-pop').text(d3.format(",")(state.attr('data-hawaii-pop')));
+            $('#hawaii-per').text(d3.format(".2%")(
+              state.attr('data-hawaii-pop')/state.attr('data-total-pop')
+            ));
+            $('#other-race-pop').text(d3.format(",")(state.attr('data-other-race-pop')));
+            $('#other-race-per').text(d3.format(".2%")(
+              state.attr('data-other-race-pop')/state.attr('data-total-pop')
+            ));
+            $('#multi-race-pop').text(d3.format(",")(state.attr('data-multi-race-pop')));
+            $('#multi-race-per').text(d3.format(".2%")(
+              state.attr('data-multi-race-pop')/state.attr('data-total-pop')
+            ));
           }
 
           function tooltipHide(ev) {
