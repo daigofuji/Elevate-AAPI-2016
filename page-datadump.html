@@ -1,0 +1,63 @@
+---
+layout: default
+title: Datadump
+description: 
+---
+
+
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.12/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.js"></script>
+
+<div id="content">
+  <table class="dump">
+  <thead>
+    <th>state</th>
+    <th>total</th>
+    <th>white</th>
+    <th>black</th>
+    <th>native</th>
+    <th>asian</th>
+    <th>hawaii</th>
+    <th>other</th>
+    <th>multi</th>
+    <th>indian</th>
+    <th>bangladeshi</th>
+    <th>cambodian</th>
+    <th>chinese</th>
+    <th>filipino</th>
+    <th>hmong</th>
+  </thead>
+  <tbody class="tablebody">
+
+  </tbody>
+  </table>
+</div>
+
+
+<script type="text/javascript"charset="utf-8">
+    d3.text("data/asian2014.csv", function(data) {
+        var parsedCSV = d3.csv.parseRows(data);
+
+        var container = d3.select(".tablebody")
+
+            .selectAll("tr")
+                .data(parsedCSV).enter()
+                .append("tr")
+
+            .selectAll("td")
+                .data(function(d) { return d; }).enter()
+                .append("td")
+                .text(function(d) { return d; });
+    });
+
+    $(document).ready(function(){
+        $('.dump').DataTable();
+    });
+</script>
+
+
+
+
+

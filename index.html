@@ -51,8 +51,12 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
         <script>/* queue */(function(){function n(n){function t(){for(;f=a<c.length&&n>p;){var u=a++,t=c[u],r=l.call(t,1);r.push(e(u)),++p,t[0].apply(null,r)}}function e(n){return function(u,l){--p,null==d&&(null!=u?(d=u,a=s=0/0,r()):(c[n]=l,--s?f||t():r()))}}function r(){null!=d?v(d):i?v(d,c):v.apply(null,[d].concat(c))}var o,f,i,c=[],a=0,p=0,s=0,d=null,v=u;return n||(n=1/0),o={defer:function(){return d||(c.push(arguments),++s,t()),o},await:function(n){return v=n,i=!1,s||r(),o},awaitAll:function(n){return v=n,i=!0,s||r(),o}}}function u(){}"undefined"==typeof module?self.queue=n:module.exports=n,n.version="1.0.4";var l=[].slice})();</script>
 
           <div id="map"></div> 
-          <div id="infobox">
-            <h4 id="state-name" class="font-heavy">Hover over map to see breakdown</h4>
+      </div>
+    </div>
+    <div class="row"> 
+      <div class="medium-9 large-7 small-centered columns">
+       <div id="infobox">
+            <h3 id="state-name" class="font-heavy">Hover over map to see breakdown</h3>
             <table>
               <tr><td>Total population of the state</td><td id="total-pop" class="text-right"></td><td></td></tr>
               <tr><td id="group-table" class="font-bold"></td><td id="group-pop" class="text-right font-bold"></td><td id="group-per" class="text-right font-bold"></td></tr>
@@ -180,13 +184,13 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
 
           var urls = {
               us: "data/us.json",
-              data: "data/asian2014.csv"
+              data: "data/asian2014_orig.csv"
           };
 
           var margin = {top: 10, left: 0, bottom: 10, right: 0},
             width = parseInt(d3.select('#map').style('width')),
             width = width - margin.left - margin.right,
-            mapRatio = .6,
+            mapRatio = .5,
             height = width * mapRatio;
 
           // projection and path setup
@@ -258,6 +262,9 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
                   .attr('data-state', function(d) {
                     return d.properties.name; 
                   })
+                  .attr('data-sf', function(d) {
+                    return data[d.properties.name] ? 'sf-' + data[d.properties.name]['abbr'].toLowerCase() : null; 
+                  })
                   .attr('data-group-pop', function(d) {
                     return data[d.properties.name] ? data[d.properties.name][group.id+'Pop'] : null; 
                   })
@@ -287,7 +294,8 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
                   });
 
               states.on('mouseover', tooltipShow)
-                .on('mouseout', tooltipHide);
+                .on('mouseout', tooltipHide)
+                .on('click', tooltipShow)
           }
 
           // change pulldown to select different group
@@ -306,7 +314,7 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
           function tooltipShow(ev) {
             var state = $(this);
             console.log(ev.properties.name, d3.format(",")(state.attr('data-total-pop')));
-            $('#state-name').text(ev.properties.name);
+            $('#state-name').text(ev.properties.name).removeClass().addClass(state.attr('data-sf'));
             $('#total-pop').text(d3.format(",")(state.attr('data-total-pop')));
             $('#group-pop').text(d3.format(",")(state.attr('data-group-pop')));
             $('#group-per').text(d3.format(".2%")(
@@ -383,20 +391,6 @@ keywords: AAPI, Asian-Americans, Elevate, AAPI Data, Daigo Fujiwara
 
       </div><!-- /col -->
     </div><!-- /row -->
-
-    <div class="row">
-      <div class="medium-4 column" id="infobox">
-      
-        
-
-      </div>
-
-      <div class="medium-8 column" id="table">
-      
-        
-
-      </div>  
-    </div>
 
   </div>
 </section>
